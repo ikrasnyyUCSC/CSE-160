@@ -1,2 +1,3 @@
 # CSE-160
-UCSC CSE-160 assignments 
+Name: Ilya Krasnyy
+Course: CSE 160
