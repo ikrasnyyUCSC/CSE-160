@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSE 160 – Assignment 1</title>
+  </head>
+
+  <body onload="main()">
+    <canvas id="webgl" width="400" height="400">
+      Please use a browser that supports "canvas"
+    </canvas>
+
+    <br/><br/>
+
+    <!-- Shape selector -->
+    <label>Shape:
+      <button id="pointBtn" onclick="g_selectedShape='point'">Point</button>
+      <button id="triangleBtn" onclick="g_selectedShape='triangle'">Triangle</button>
+      <button id="circleBtn" onclick="g_selectedShape='circle'">Circle</button>
+    </label>
+
+    <br/><br/>
+
+    <!-- Manipulators -->
+     <button onclick="undoShape()">Undo</button>
+     <button onclick="toggleGrid()">Toggle Grid</button>
+     <br/><br/>
+
+    <!-- Colors -->
+    <label>R: <input type="range" id="rSlider" min="0" max="255" value="255" /></label>
+    <label>G: <input type="range" id="gSlider" min="0" max="255" value="255" /></label>
+    <label>B: <input type="range" id="bSlider" min="0" max="255" value="255" /></label>
+    <br/><br/>
+
+    <!-- Size -->
+    <label>Size: <input type="range" id="sizeSlider" min="1" max="50" value="10" /></label>
+    <br/><br/>
+
+    <!-- Circle slider -->
+    <label>Circle Segments: <input type="range" id="segSlider" min="3" max="64" value="32" oninput="updateSegLabel(this.value)"/></label>
+    <span id="segLabel">32</span>
+    <br/><br/>
+
+    <!-- Clear -->
+    <button onclick="clearCanvas()">Clear</button>
+
+    <!-- Your graph paper reference image -->
+    <br/><br/>
+    <img id="referenceImg" src="reference.jpg" width="400" alt="Graph paper drawing"/>
+
+    <br/><br/>
+    <!-- Button to draw the picture -->
+    <button onclick="drawPicture()">Draw Picture</button>
+
+    <script src="lib/webgl-utils.js"></script>
+    <script src="lib/webgl-debug.js"></script>
+    <script src="lib/cuon-utils.js"></script>
+    <script src="asg1.js"></script>
+  </body>
+</html>
