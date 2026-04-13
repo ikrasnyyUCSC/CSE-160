@@ -162,7 +162,7 @@ function connectVariablesToGLSL() {
   return true;
 }
 
-function click(ev) {
+function handleClicks(ev) {
   // Convert mouse coords to WebGL coords
   var x = ev.clientX;
   var y = ev.clientY;
@@ -342,13 +342,13 @@ function main() {
   if (!setupWebGL()) return;
   if (!connectVariablesToGLSL()) return;
   // Mouse handlers
-  canvas.onmousedown = function(ev) { click(ev); };
+  canvas.onmousedown = function(ev) { handleClicks(ev); };
   canvas.onmousemove = function(ev) {
     if (ev.buttons == 1) {
       var now = performance.now();
       if (now - g_lastMoveTime > 16) { // ~60fps throttle
         g_lastMoveTime = now;
-        click(ev);
+        handleClicks(ev);
       }
     }
   };
