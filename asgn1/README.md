@@ -22,3 +22,7 @@
 ## Known Issues
 
 - Performance degrades with a large number of shapes, especially circles with high segment counts. I've tried to optimize it, but performance did not reach a my desired level.
+
+## Notes
+
+- The entire code is within the asg1.js and asg1.html files. other files were used as reference and wern't significantly changed form their original view.
