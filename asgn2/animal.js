@@ -1,6 +1,13 @@
+/*  This code was written mainly by me, with a slight
+*   assistance from claude to fix up minor bugs and
+*   some perdormance issues. Otherwise, I was the one
+*   making it. In addition to that, please do not take
+*   offence about the meme. The main point was making
+*   a replica of a meme and not be inappropriate because
+*   of the lyrics of the song.
+*/
 
 //  Shaders
-
 const VSHADER_SOURCE = `
   attribute vec4 a_Position;
   uniform mat4 u_GlobalRotation;
