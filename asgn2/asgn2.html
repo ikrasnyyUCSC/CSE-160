@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSE 160 – Assignment 2</title>
+  </head>
+
+  <body onload="main()">
+    <h1>Assignment 2 – Polish Cow</h1>
+
+    <canvas id="webgl" width="600" height="600">
+      Please use a browser that supports "canvas"
+    </canvas>
+
+    <br/><br/>
+
+    <!-- Animation controls -->
+<button id="btnWalk" onclick="toggleAnimation()">Walk: OFF</button>
+<button id="btnDance" onclick="toggleDance()">Moo: OFF</button>
+<button onclick="g_poking=true; g_pokeStart=g_time;">Poke</button>
+<button onclick="resetSliders()">Reset</button>
+
+    <br/><br/>
+
+    <br/>
+    <label>Music Volume: <input type="range" id="volumeSlider" min="0" max="100" value="100"
+      oninput="g_danceAudio.volume=this.value/100"/></label>
+
+    <!-- Global rotation -->
+    <label>Global Rotation: <input type="range" id="globalAngle" min="-180" max="180" value="0"
+      oninput="g_globalAngle=+this.value; renderScene()"/></label>
+
+    <br/><br/>
+
+    <!-- Front left leg -->
+    <label>Front Left Thigh: <input type="range" id="flThigh" min="-60" max="60" value="0"
+      oninput="g_flThigh=+this.value; renderScene()"/></label>
+    <br/>
+    <label>Front Left Calf: <input type="range" id="flCalf" min="-80" max="0" value="0"
+      oninput="g_flCalf=+this.value; renderScene()"/></label>
+    <br/>
+    <label>Front Left Hoof: <input type="range" id="flHoof" min="-45" max="45" value="0"
+      oninput="g_flHoof=+this.value; renderScene()"/></label>
+
+    <br/><br/>
+
+    <!-- Front right leg -->
+    <label>Front Right Thigh: <input type="range" id="frThigh" min="-60" max="60" value="0"
+      oninput="g_frThigh=+this.value; renderScene()"/></label>
+    <br/>
+    <label>Front Right Calf: <input type="range" id="frCalf" min="-80" max="0" value="0"
+      oninput="g_frCalf=+this.value; renderScene()"/></label>
+    <br/>
+    <label>Front Right Hoof: <input type="range" id="frHoof" min="-45" max="45" value="0"
+      oninput="g_frHoof=+this.value; renderScene()"/></label>
+
+    <br/><br/>
+
+    <!-- Back left leg -->
+    <label>Back Left Thigh: <input type="range" id="blThigh" min="-60" max="60" value="0"
+      oninput="g_blThigh=+this.value; renderScene()"/></label>
+    <br/>
+    <label>Back Left Calf: <input type="range" id="blCalf" min="-80" max="0" value="0"
+      oninput="g_blCalf=+this.value; renderScene()"/></label>
+    <br/>
+    <label>Back Left Hoof: <input type="range" id="blHoof" min="-45" max="45" value="0"
+      oninput="g_blHoof=+this.value; renderScene()"/></label>
+
+    <br/><br/>
+
+    <!-- Back right leg -->
+    <label>Back Right Thigh: <input type="range" id="brThigh" min="-60" max="60" value="0"
+      oninput="g_brThigh=+this.value; renderScene()"/></label>
+    <br/>
+    <label>Back Right Calf: <input type="range" id="brCalf" min="-80" max="0" value="0"
+      oninput="g_brCalf=+this.value; renderScene()"/></label>
+    <br/>
+    <label>Back Right Hoof: <input type="range" id="brHoof" min="-45" max="45" value="0"
+      oninput="g_brHoof=+this.value; renderScene()"/></label>
+
+    <br/><br/>
+
+    <!-- Head -->
+    <label>Head Nod: <input type="range" id="headNod" min="-40" max="40" value="0"
+      oninput="g_headNod=+this.value; renderScene()"/></label>
+    <br/>
+    <label>Head Turn: <input type="range" id="headTurn" min="-60" max="60" value="0"
+      oninput="g_headTurn=+this.value; renderScene()"/></label>
+
+    <br/><br/>
+
+    <!-- Tail -->
+    <label>Tail Swing: <input type="range" id="tailSwing" min="-60" max="60" value="0"
+      oninput="g_tailSwing=+this.value; renderScene()"/></label>
+    <br/>
+    <label>Tail Tip: <input type="range" id="tailTip" min="-60" max="60" value="0"
+      oninput="g_tailTip=+this.value; renderScene()"/></label>
+
+    <br/><br/>
+
+    <!-- Performance -->
+    <span>FPS: <span id="fpsDisplay">--</span></span>
+
+    <br/><br/>
+    <p>Drag on canvas to rotate. Shift+click to poke the cow.</p>
+
+    <script src="lib/cuon-utils.js"></script>
+    <script src="lib/cuon-matrix-cse160.js"></script>
+    <script src="lib/webgl-utils.js"></script>
+    <script src="animal.js"></script>
+  </body>
+</html>
