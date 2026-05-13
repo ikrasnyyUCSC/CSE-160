@@ -351,7 +351,7 @@ function updateGame(t) {
   const timerEl = document.getElementById('gameTimer');
 
   if (g_gameWon) {
-    timerEl.textContent = `You found her in ${g_winTime.toFixed(1)}s! Press T to dance 🎉`;
+    timerEl.textContent = `You found her in ${g_winTime.toFixed(1)}s! Press T to dance `;
     return;
   }
 

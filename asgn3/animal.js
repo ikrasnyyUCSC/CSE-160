@@ -293,7 +293,7 @@ function drawCow(viewMatrix, projMatrix, t) {
   _drawLeg(cowM, -0.3, -0.2, brThigh, brCalf);
 }
 
-// ── private draw helpers ─────────────────────────────────────
+// private draw helpers
 function _drawLeg(cowM, x, z, thighA, calfA) {
   // Body bottom is at Y=0.25 (body center 0.5, half-height 0.25)
   let thighBase = new Matrix4(); thighBase.setTranslate(x, 0.25, z); thighBase.rotate(thighA,0,0,1);
