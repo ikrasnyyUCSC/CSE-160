@@ -125,6 +125,15 @@ const _CYL_N    = 12;
 const _cylVerts = _buildCylVerts(_CYL_N);
 const _cylCount = _CYL_N * 4 * 3;
 
+function getCowPosition(t) {
+  if (_dancing) return { x: _cowFrozenX, z: _cowFrozenZ };
+  let angle = (t - _timeOffset) * COW_WALK_SPEED;
+  return {
+    x: COW_CENTER_X + Math.cos(-angle) * COW_RADIUS,
+    z: COW_CENTER_Z + Math.sin(-angle) * COW_RADIUS,
+  };
+}
+
 function initAnimal(gl) {
   _gl = gl;
 

@@ -84,6 +84,9 @@ let g_pointerLocked = false;
 let g_startTime = 0;
 let g_buildTexIndex = 0; // 0=brick, 1=grass, 2=stone
 const BUILD_TEX_NAMES = ['Brick', 'Grass', 'Stone'];
+let g_gameWon   = false;
+let g_winTime   = 0;
+const FIND_DIST = 4.0;
 
 // Cube geometry
 const g_cubePos = new Float32Array([
@@ -342,6 +345,30 @@ function deleteBlock() {
   cell.delete(top);
 }
 
+// Game
+function updateGame(t) {
+  const msgEl   = document.getElementById('gameMsg');
+  const timerEl = document.getElementById('gameTimer');
+
+  if (g_gameWon) {
+    timerEl.textContent = `You found her in ${g_winTime.toFixed(1)}s! Press T to dance 🎉`;
+    return;
+  }
+
+  timerEl.textContent = `Time: ${t.toFixed(1)}s`;
+
+  const cowPos = getCowPosition(t);
+  const dx = g_camera.eye.elements[0] - cowPos.x;
+  const dz = g_camera.eye.elements[2] - cowPos.z;
+  const dist = Math.sqrt(dx*dx + dz*dz);
+
+  if (dist < FIND_DIST) {
+    g_gameWon = true;
+    g_winTime = t;
+    msgEl.textContent = 'You found the cow!';
+  }
+}
+
 // Render
 function renderScene() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -356,6 +383,9 @@ function renderScene() {
   // Cow pass — animal.js handles its own program switch internally
   drawCow(g_camera.viewMatrix, g_camera.projectionMatrix, t);
   updateAudioVolume(g_camera.eye.elements[0], g_camera.eye.elements[2]);
+
+  // Game logic
+  updateGame(t);
 
   // Restore world program for next frame
   gl.useProgram(g_worldProgram);

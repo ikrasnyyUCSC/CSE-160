@@ -19,6 +19,14 @@
       color: white; font-size: 20px; line-height: 1;
       text-shadow: 0 0 3px black;
     }
+    #hud {
+      position: absolute; pointer-events: none;
+      top: 16px; left: 50%; transform: translateX(-50%);
+      color: white; font-family: monospace; font-size: 15px;
+      text-align: center; text-shadow: 0 0 6px black;
+    }
+    #hud #gameMsg { font-size: 20px; font-weight: bold; color: #ffe066; }
+    #hud #gameTimer { margin-top: 4px; color: #ccc; }
     #wrapper { position: relative; }
     #hint { color: #888; font-size: 11px; font-family: monospace; padding: 4px 10px; background: #1a1a1a; width: 800px; box-sizing: border-box; }
   </style>
@@ -31,6 +39,10 @@
   <div id="wrapper">
     <canvas id="webgl" width="800" height="600"></canvas>
     <div id="crosshair">+</div>
+    <div id="hud">
+      <div id="gameMsg">Find the dancing cow!</div>
+      <div id="gameTimer">Time: 0.0s</div>
+    </div>
   </div>
   <div id="hint">Pointer lock: click canvas to capture mouse. ESC to release.</div>
 
