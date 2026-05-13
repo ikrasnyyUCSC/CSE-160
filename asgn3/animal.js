@@ -1,8 +1,12 @@
-// ============================================================
-//  animal.js — Self-contained cow for Blocky World (asgn3)
-//  Call initAnimal(gl) once at startup.
-//  Call drawCow(viewMatrix, projMatrix, t) each frame.
-// ============================================================
+/*  This code was written mainly by me, with a slight
+*   assistance from claude to fix up minor bugs and
+*   some perdormance issues. Otherwise, I was the one
+*   making it. In addition to that, please do not take
+*   offence about the meme. The main point was making
+*   a replica of a meme and not be inappropriate because
+*   of the lyrics of the song.
+*/
+
 
 const ANIMAL_VSHADER = `
   attribute vec4 a_Position;
@@ -22,7 +26,6 @@ const ANIMAL_FSHADER = `
   }
 `;
 
-// ── private state ────────────────────────────────────────────
 let _gl;
 let _program;
 let _a_Position;
@@ -85,7 +88,6 @@ function updateAudioVolume(camX, camZ, t) {
   _danceAudio.volume = Math.max(0, Math.min(0.5, 1 - dist / 15));
 }
 
-// ── geometry (same as asgn2) ─────────────────────────────────
 const _cubeVerts = new Float32Array([
   // Front
   -0.5,-0.5, 0.5,  0.5,-0.5, 0.5,  0.5, 0.5, 0.5,
@@ -123,7 +125,6 @@ const _CYL_N    = 12;
 const _cylVerts = _buildCylVerts(_CYL_N);
 const _cylCount = _CYL_N * 4 * 3;
 
-// ── public API ───────────────────────────────────────────────
 function initAnimal(gl) {
   _gl = gl;
 

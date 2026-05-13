@@ -1,9 +1,7 @@
-// ============================================================
 //  world.js — Blocky World (Assignment 3)
 //  Cow is handled by animal.js
-// ============================================================
 
-// ── SHADERS ─────────────────────────────────────────────────
+// Shaders
 const VSHADER_SOURCE = `
   attribute vec4 a_Position;
   attribute vec2 a_TexCoord;
@@ -35,7 +33,7 @@ const FSHADER_SOURCE = `
   }
 `;
 
-// ── WORLD MAP (32×32) — 0=empty, 1‑4=wall height ────────────
+// World map (32×32): 0=empty, 1‑4 = wall height 
 const g_map = [
   [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
   [4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4],
@@ -71,7 +69,7 @@ const g_map = [
   [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
 ];
 
-// ── GLOBALS ──────────────────────────────────────────────────
+// Globals
 let gl, canvas;
 let a_Position, a_TexCoord;
 let u_ModelMatrix, u_ViewMatrix, u_ProjectionMatrix;
@@ -87,7 +85,7 @@ let g_startTime = 0;
 let g_buildTexIndex = 0; // 0=brick, 1=grass, 2=stone
 const BUILD_TEX_NAMES = ['Brick', 'Grass', 'Stone'];
 
-// ── CUBE GEOMETRY ────────────────────────────────────────────
+// Cube geometry
 const g_cubePos = new Float32Array([
   // Front  (+Z)
   -0.5,-0.5, 0.5,  0.5,-0.5, 0.5,  0.5, 0.5, 0.5,
@@ -124,7 +122,7 @@ const g_cubeUV = new Float32Array([
   0,0, 1,0, 1,1,  0,0, 1,1, 0,1,
 ]);
 
-// ── CAMERA CLASS ─────────────────────────────────────────────
+// Camera
 class Camera {
   constructor() {
     this.fov = 60;
@@ -186,7 +184,7 @@ class Camera {
   }
 }
 
-// ── PROCEDURAL TEXTURES ──────────────────────────────────────
+// Proc. gen textures
 function makeBrickTexture(size) {
   const c=document.createElement('canvas'); c.width=c.height=size;
   const ctx=c.getContext('2d');
@@ -243,7 +241,7 @@ function loadTexFromCanvas(texUnit, cnv) {
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT);
 }
 
-// ── DRAW HELPERS ─────────────────────────────────────────────
+// Draw helpers
 function drawCube(M, color, texIndex, texWeight) {
   texWeight = (texWeight===undefined) ? 1.0 : texWeight;
   texIndex  = (texIndex ===undefined) ? 0   : texIndex;
@@ -266,23 +264,22 @@ function drawCube(M, color, texIndex, texWeight) {
   gl.drawArrays(gl.TRIANGLES, 0, 36);
 }
 
-// ── WORLD DRAW ───────────────────────────────────────────────
 function drawWorld() {
   const HALF = 16;
 
-  // Ground — grass texture
+  // Ground: grass texture
   let ground = new Matrix4();
   ground.setTranslate(HALF, -0.05, HALF);
   ground.scale(64, 0.1, 64);
   drawCube(ground, [0.4,0.7,0.3], 1, 1.0);
 
-  // Sky box — solid blue, no texture
+  // Sky box: solid blue, no texture
   let sky = new Matrix4();
   sky.setTranslate(HALF, 0, HALF);
   sky.scale(500, 500, 500);
   drawCube(sky, [0.35,0.55,0.9], 0, 0.0);
 
-  // Blocks — sparse per-cell map
+  // Blocks: sparse per-cell map
   for (let x=0; x<32; x++) {
     for (let z=0; z<32; z++) {
       const cell = g_blocks[z][x];
@@ -295,7 +292,7 @@ function drawWorld() {
   }
 }
 
-// ── SPARSE BLOCK STORAGE ─────────────────────────────────────
+// Block storage
 // g_blocks[z][x] = Map<y, texIndex>
 const HEIGHT_LIMIT = 32;
 
@@ -306,7 +303,7 @@ const g_blocks = (() => {
     for (let x=0; x<32; x++) {
       const cell = new Map();
       const h = g_map[z][x];
-      // legacy: fill from 0 up to h with default tex
+      // legacy: fill from 0 up to h with default textures
       const defTex = (h >= 3) ? 2 : 0;
       for (let y=0; y<h; y++) cell.set(y, defTex);
       arr[z][x] = cell;
@@ -315,7 +312,7 @@ const g_blocks = (() => {
   return arr;
 })();
 
-// ── ADD / DELETE BLOCKS ──────────────────────────────────────
+// Add/delete blocks
 function getTargetCell() {
   // target XZ cell 2 units in front of camera
   let f = new Vector3(g_camera.at.elements); f.sub(g_camera.eye); f.normalize();
@@ -345,7 +342,7 @@ function deleteBlock() {
   cell.delete(top);
 }
 
-// ── RENDER ───────────────────────────────────────────────────
+// Render
 function renderScene() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   let t = performance.now()/1000 - g_startTime;
@@ -364,7 +361,6 @@ function renderScene() {
   gl.useProgram(g_worldProgram);
 }
 
-// ── MAIN ─────────────────────────────────────────────────────
 function main() {
   canvas = document.getElementById('webgl');
   gl = canvas.getContext('webgl');
