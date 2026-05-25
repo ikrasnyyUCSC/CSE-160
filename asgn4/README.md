@@ -1,6 +1,12 @@
 # Blocky World — Lighting (Assignment 4)
 
+
+
 A first-person WebGL world with Phong lighting, a loaded OBJ model, and interactive light controls.
+
+## Comments:
+
+Light color picker was something that I was able to find and implement solily because of claude. I was messing around with this feature and asked for a bit of help from claude. It probided some features that I never knew existed and now it works in soomewhat more interesting way then initially anticipated
 
 ## Controls
 
