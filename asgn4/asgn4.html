@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Blocky World — Lighting</title>
+  <style>
+    body { margin:0; background:#111; display:flex; flex-direction:column; align-items:center; font-family:monospace; }
+    canvas { display:block; cursor:crosshair; }
+
+    #ui {
+      display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+      padding:6px 10px; background:#222; width:800px; box-sizing:border-box;
+      color:#eee; font-size:12px;
+    }
+    #ui button {
+      background:#444; color:#eee; border:1px solid #666;
+      padding:3px 10px; cursor:pointer; font-family:monospace; font-size:12px;
+    }
+    #ui button.on  { background:#295; border-color:#4c8; }
+    #ui button.off { background:#522; border-color:#a44; }
+    #ui label { display:flex; flex-direction:column; align-items:center; gap:2px; }
+    #ui input[type=range] { width:90px; }
+    #ui input[type=color] { width:36px; height:22px; padding:0; border:none; cursor:pointer; }
+
+    #wrapper { position:relative; }
+    #crosshair {
+      position:absolute; pointer-events:none;
+      top:50%; left:50%; transform:translate(-50%,-50%);
+      color:white; font-size:20px; text-shadow:0 0 3px black;
+    }
+    #hint { color:#666; font-size:11px; padding:3px 10px; background:#1a1a1a; width:800px; box-sizing:border-box; }
+    #fpsDisplay { color:#4f4; font-weight:bold; }
+  </style>
+</head>
+<body>
+<div id="ui">
+  <span>FPS:<b id="fpsDisplay">--</b></span>
+
+  <button id="btnLighting" class="on"  onclick="toggleLighting()">Lighting: ON</button>
+  <button id="btnNormals"  class="off" onclick="toggleNormals()">Normals: OFF</button>
+  <button id="btnLight1"   class="on"  onclick="toggleLight1()">Point Light: ON</button>
+  <button id="btnLight2"   class="on"  onclick="toggleLight2()">Spot Light: ON</button>
+
+  <label>Light angle
+    <input type="range" id="sliderAngle" min="0" max="360" value="0"
+           oninput="g_lightAngleOverride=+this.value; g_lightAutoOrbit=false;">
+  </label>
+  <label>Light height
+    <input type="range" id="sliderHeight" min="1" max="20" value="8"
+           oninput="g_lightHeight=+this.value">
+  </label>
+  <label>Light color
+    <input type="color" id="lightColor" value="#ffffff"
+           oninput="onLightColorChange(this.value)">
+  </label>
+  <label>Specular
+    <input type="range" id="sliderSpec" min="0" max="100" value="50"
+           oninput="g_specularStrength=this.value/100">
+  </label>
+</div>
+
+<div id="wrapper">
+  <canvas id="webgl" width="800" height="600"></canvas>
+  <div id="crosshair">+</div>
+</div>
+<div id="hint">Click canvas to lock mouse · WASD=move · QE=turn · ESC=release</div>
+
+<script src="lib/cuon-utils.js"></script>
+<script src="lib/cuon-matrix-cse160.js"></script>
+<script src="lib/webgl-utils.js"></script>
+<script src="world.js"></script>
+</body>
+</html>
