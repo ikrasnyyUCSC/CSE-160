@@ -90,9 +90,12 @@
 </head>
 <body>
 
+<audio id="bgm" src="asgn5_music.mp3" loop preload="auto"></audio>
+
 <div id="loading">
   <h1>INITIAL D</h1>
   <p>AKINA TOUGE: NIGHT RUN</p>
+  <p style="margin-top:24px; font-size:11px; letter-spacing:3px; color:rgba(255,255,255,0.5);">CLICK ANYWHERE TO START</p>
 </div>
 
 <div id="vignette"></div>
@@ -629,9 +632,14 @@ gltfLoader.load('Toyota_AE86.glb', (gltf) => {
   ae86.add(model);
 
   const loading = document.getElementById('loading');
+  const bgm = document.getElementById('bgm');
   if (loading) {
-    loading.style.opacity = '0';
-    setTimeout(() => loading.remove(), 800);
+    loading.addEventListener('click', () => {
+      bgm.volume = 0.6;
+      bgm.play();
+      loading.style.opacity = '0';
+      setTimeout(() => loading.remove(), 800);
+    }, { once: true });
   }
 }, undefined, (err) => {
   console.error('GLB load error:', err);
