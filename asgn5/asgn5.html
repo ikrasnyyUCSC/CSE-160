@@ -110,6 +110,44 @@
   LEFT DRAG: ORBIT &nbsp;|&nbsp; RIGHT DRAG: PAN &nbsp;|&nbsp; SCROLL: ZOOM
 </div>
 
+<div id="volume-control">
+  <span>♪</span>
+  <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.6">
+</div>
+
+<style>
+  #volume-control {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255,255,255,0.5);
+    font-size: 14px;
+    pointer-events: all;
+    z-index: 10;
+  }
+  #volume-slider {
+    -webkit-appearance: none;
+    width: 90px;
+    height: 3px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  #volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ff6600;
+    cursor: pointer;
+  }
+</style>
+
+
 <script type="importmap">
 {
   "imports": {
@@ -800,6 +838,10 @@ window.addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
+});
+
+document.getElementById('volume-slider').addEventListener('input', e => {
+  document.getElementById('bgm').volume = e.target.value;
 });
 
 animate();
