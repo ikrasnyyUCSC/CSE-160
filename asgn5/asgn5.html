@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Initial D — Akina Touge Night Run</title>
+  <title>Initial D: Night Drift</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; }
@@ -92,7 +92,7 @@
 
 <div id="loading">
   <h1>INITIAL D</h1>
-  <p>AKINA TOUGE — NIGHT RUN</p>
+  <p>AKINA TOUGE: NIGHT RUN</p>
 </div>
 
 <div id="vignette"></div>
@@ -100,11 +100,11 @@
 
 <div id="hud">
   <div id="title">Initial D</div>
-  <div id="subtitle">Akina Touge — Night Run</div>
+  <div id="subtitle">Akina Touge: Night Run</div>
 </div>
 
 <div id="controls-hint">
-  LEFT DRAG — ORBIT &nbsp;|&nbsp; RIGHT DRAG — PAN &nbsp;|&nbsp; SCROLL — ZOOM
+  LEFT DRAG: ORBIT &nbsp;|&nbsp; RIGHT DRAG: PAN &nbsp;|&nbsp; SCROLL: ZOOM
 </div>
 
 <script type="importmap">
@@ -260,39 +260,22 @@ const ROAD_RADIUS = 22;
 const ROAD_WIDTH = 8;
 const ROAD_SEGMENTS = 128;
 
-// Flat circular road built from a custom ring shape extruded slightly
-// Using CylinderGeometry with inner/outer radius via RingGeometry + thin box approach:
-// Best approach: custom BufferGeometry ring lying flat on Y=0
 function makeRoadRing(innerR, outerR, segments) {
   const geo = new THREE.BufferGeometry();
-  const verts = [];
-  const uvs = [];
-  const indices = [];
-
+  const verts = [], uvs = [], indices = [];
   for (let i = 0; i <= segments; i++) {
     const angle = (i / segments) * Math.PI * 2;
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
+    const cos = Math.cos(angle), sin = Math.sin(angle);
     const u = i / segments;
-
-    // inner vertex
     verts.push(cos * innerR, 0, sin * innerR);
     uvs.push(0, u * (outerR - innerR));
-
-    // outer vertex
     verts.push(cos * outerR, 0, sin * outerR);
     uvs.push(1, u * (outerR - innerR));
   }
-
   for (let i = 0; i < segments; i++) {
-    const a = i * 2;
-    const b = a + 1;
-    const c = a + 2;
-    const d = a + 3;
-    indices.push(a, b, c);
-    indices.push(b, d, c);
+    const a = i*2, b = a+1, c = a+2, d = a+3;
+    indices.push(a, b, c, b, d, c);
   }
-
   geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
   geo.setIndex(indices);
@@ -300,32 +283,26 @@ function makeRoadRing(innerR, outerR, segments) {
   return geo;
 }
 
-const roadGeo = makeRoadRing(ROAD_RADIUS - ROAD_WIDTH/2, ROAD_RADIUS + ROAD_WIDTH/2, ROAD_SEGMENTS);
-const roadMat = new THREE.MeshStandardMaterial({
-  map: roadTex, roughness: 0.6, metalness: 0.1, color: 0xaaaaaa
-});
-const road = new THREE.Mesh(roadGeo, roadMat);
+const road = new THREE.Mesh(
+  makeRoadRing(ROAD_RADIUS - ROAD_WIDTH/2, ROAD_RADIUS + ROAD_WIDTH/2, ROAD_SEGMENTS),
+  new THREE.MeshStandardMaterial({ map: roadTex, roughness: 0.6, metalness: 0.1, color: 0xaaaaaa })
+);
 road.position.y = 0.01;
 road.receiveShadow = true;
 scene.add(road);
 
-// Wet road overlay
-const wetGeo = makeRoadRing(ROAD_RADIUS - ROAD_WIDTH/2 + 0.2, ROAD_RADIUS + ROAD_WIDTH/2 - 0.2, ROAD_SEGMENTS);
-const wetMat = new THREE.MeshStandardMaterial({
-  map: wetTex, transparent: true, opacity: 0.35,
-  roughness: 0.05, metalness: 0.9,
-  color: 0x4488ff, blending: THREE.AdditiveBlending, depthWrite: false
-});
-const wetRoad = new THREE.Mesh(wetGeo, wetMat);
+const wetRoad = new THREE.Mesh(
+  makeRoadRing(ROAD_RADIUS - ROAD_WIDTH/2 + 0.2, ROAD_RADIUS + ROAD_WIDTH/2 - 0.2, ROAD_SEGMENTS),
+  new THREE.MeshStandardMaterial({ map: wetTex, transparent: true, opacity: 0.35, roughness: 0.05, metalness: 0.9, color: 0x4488ff, blending: THREE.AdditiveBlending, depthWrite: false })
+);
 wetRoad.position.y = 0.02;
 scene.add(wetRoad);
 
-// Guardrails (inner & outer)
+// Guardrails
 function makeGuardrail(radius) {
   const mat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8, roughness: 0.3 });
   [0.4, 0.8].forEach(h => {
-    const geo = makeRoadRing(radius - 0.08, radius + 0.08, ROAD_SEGMENTS);
-    const mesh = new THREE.Mesh(geo, mat);
+    const mesh = new THREE.Mesh(makeRoadRing(radius - 0.08, radius + 0.08, ROAD_SEGMENTS), mat);
     mesh.position.y = h;
     mesh.castShadow = true;
     scene.add(mesh);
@@ -334,13 +311,11 @@ function makeGuardrail(radius) {
 makeGuardrail(ROAD_RADIUS - ROAD_WIDTH/2 - 0.4);
 makeGuardrail(ROAD_RADIUS + ROAD_WIDTH/2 + 0.4);
 
-// Guardrail posts
 for (let i = 0; i < 60; i++) {
   const angle = (i / 60) * Math.PI * 2;
-  const postGeo = new THREE.CylinderGeometry(0.08, 0.08, 1.0, 6);
   const postMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.7, roughness: 0.4 });
   [ROAD_RADIUS - ROAD_WIDTH/2 - 0.4, ROAD_RADIUS + ROAD_WIDTH/2 + 0.4].forEach(r => {
-    const post = new THREE.Mesh(postGeo, postMat);
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.0, 6), postMat);
     post.position.set(Math.cos(angle)*r, 0.5, Math.sin(angle)*r);
     post.castShadow = true;
     scene.add(post);
@@ -350,25 +325,22 @@ for (let i = 0; i < 60; i++) {
 // Trees
 function makeTree(x, z, scale = 1) {
   const group = new THREE.Group();
-  const trunkGeo = new THREE.CylinderGeometry(0.2*scale, 0.3*scale, 2.5*scale, 7);
-  const trunkMat = new THREE.MeshStandardMaterial({ map: barkTex, roughness: 1 });
-  const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+  const trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.2*scale, 0.3*scale, 2.5*scale, 7),
+    new THREE.MeshStandardMaterial({ map: barkTex, roughness: 1 })
+  );
   trunk.position.y = 1.25 * scale;
   trunk.castShadow = true;
   group.add(trunk);
-
   const colors = [0x1a4010, 0x1f5015, 0x234c12, 0x0f3008];
   [[1.8*scale, 3.2*scale, 2.2*scale], [1.4*scale, 2.4*scale, 3.5*scale], [1.0*scale, 1.6*scale, 4.5*scale]].forEach(([rx, ry, py], li) => {
-    const leafGeo = new THREE.ConeGeometry(rx, ry, 7);
-    const leaf = new THREE.Mesh(leafGeo, new THREE.MeshStandardMaterial({ color: colors[li], roughness: 0.9 }));
+    const leaf = new THREE.Mesh(new THREE.ConeGeometry(rx, ry, 7), new THREE.MeshStandardMaterial({ color: colors[li], roughness: 0.9 }));
     leaf.position.y = py;
     leaf.castShadow = true;
     group.add(leaf);
   });
-
   group.position.set(x, 0, z);
   scene.add(group);
-  return group;
 }
 
 for (let i = 0; i < 50; i++) {
@@ -382,31 +354,26 @@ for (let i = 0; i < 15; i++) {
   makeTree(Math.cos(angle)*r, Math.sin(angle)*r, 0.5 + Math.random()*0.5);
 }
 
-// Hills (half-spheres rising from ground)
-function makeHill(x, z, rx, rz, h) {
-  const geo = new THREE.SphereGeometry(1, 20, 12, 0, Math.PI*2, 0, Math.PI/2);
-  geo.scale(rx, h, rz);
-  const mat = new THREE.MeshStandardMaterial({ color: 0x1a3010, roughness: 1 });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.position.set(x, 0, z);
-  mesh.receiveShadow = true;
-  scene.add(mesh);
-}
+// Hills
 for (let i = 0; i < 12; i++) {
   const angle = (i / 12) * Math.PI * 2;
   const r = 55 + Math.random() * 25;
-  makeHill(Math.cos(angle)*r, Math.sin(angle)*r,
-    10 + Math.random()*8, 10 + Math.random()*8,
-    5 + Math.random()*6);
+  const geo = new THREE.SphereGeometry(1, 20, 12, 0, Math.PI*2, 0, Math.PI/2);
+  geo.scale(10 + Math.random()*8, 5 + Math.random()*6, 10 + Math.random()*8);
+  const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x1a3010, roughness: 1 }));
+  mesh.position.set(Math.cos(angle)*r, 0, Math.sin(angle)*r);
+  mesh.receiveShadow = true;
+  scene.add(mesh);
 }
 
 // Rocks
 for (let i = 0; i < 25; i++) {
   const angle = Math.random() * Math.PI * 2;
   const r = ROAD_RADIUS + ROAD_WIDTH/2 + 2 + Math.random() * 30;
-  const geo = new THREE.DodecahedronGeometry(0.3 + Math.random() * 0.7, 0);
-  const mat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 1 });
-  const rock = new THREE.Mesh(geo, mat);
+  const rock = new THREE.Mesh(
+    new THREE.DodecahedronGeometry(0.3 + Math.random() * 0.7, 0),
+    new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 1 })
+  );
   rock.position.set(Math.cos(angle)*r, 0.2, Math.sin(angle)*r);
   rock.rotation.set(Math.random()*2, Math.random()*2, Math.random()*2);
   rock.castShadow = true;
@@ -443,119 +410,7 @@ for (let i = 0; i < 8; i++) {
   scene.add(ptLight);
 }
 
-// AE86 GLB model
-const ae86 = new THREE.Group();
-scene.add(ae86);
-
-const gltfLoader = new GLTFLoader();
-gltfLoader.load('Toyota_AE86.glb', (gltf) => {
-  const model = gltf.scene;
-
-  const box = new THREE.Box3().setFromObject(model);
-  const size = new THREE.Vector3();
-  box.getSize(size);
-
-  const targetLength = 4.0;
-  const longestAxis = Math.max(size.x, size.y, size.z);
-  const scale = targetLength / longestAxis;
-  model.scale.setScalar(scale);
-
-  box.setFromObject(model);
-  model.position.y = -box.min.y;
-
-  model.rotation.y = 0;
-
-  model.traverse(child => {
-    if (child.isMesh) {
-      child.castShadow = true;
-      child.receiveShadow = true;
-    }
-  });
-
-  ae86.add(model);
-
-  // Debug: log bounding box so we can see the car's actual size and position
-  const debugBox = new THREE.Box3().setFromObject(ae86);
-  const debugSize = new THREE.Vector3();
-  const debugCenter = new THREE.Vector3();
-  debugBox.getSize(debugSize);
-  debugBox.getCenter(debugCenter);
-  console.log('[AE86] bounding box size:', debugSize);
-  console.log('[AE86] bounding box center:', debugCenter);
-  console.log('[AE86] ae86 group position:', ae86.position);
-  console.log('[AE86] model children count:', model.children.length);
-
-  // Hide loading screen only after the GLB is fully loaded and added to scene
-  const loading = document.getElementById('loading');
-  if (loading) {
-    loading.style.opacity = '0';
-    setTimeout(() => loading.remove(), 800);
-  }
-}, undefined, (err) => {
-  console.error('GLB load error:', err);
-  // Hide loading even on error so the scene isn't stuck
-  const loading = document.getElementById('loading');
-  if (loading) {
-    loading.style.opacity = '0';
-    setTimeout(() => loading.remove(), 800);
-  }
-});
-
-// Headlight spotlights
-const hlLightL = new THREE.SpotLight(0xffffff, 80, 30, Math.PI/8, 0.3, 1.5);
-const hlLightR = new THREE.SpotLight(0xffffff, 80, 30, Math.PI/8, 0.3, 1.5);
-scene.add(hlLightL, hlLightR);
-const hlTargetL = new THREE.Object3D();
-const hlTargetR = new THREE.Object3D();
-scene.add(hlTargetL, hlTargetR);
-hlLightL.target = hlTargetL;
-hlLightR.target = hlTargetR;
-
-// Tire smoke particles
-const smokeParticles = [];
-const smokeGeo = new THREE.SphereGeometry(0.15, 6, 6);
-for (let i = 0; i < 30; i++) {
-  const smokeMat = new THREE.MeshBasicMaterial({
-    color: 0xaaaaaa, transparent: true, opacity: 0, blending: THREE.AdditiveBlending
-  });
-  const smoke = new THREE.Mesh(smokeGeo, smokeMat);
-  scene.add(smoke);
-  smokeParticles.push({ mesh: smoke, life: 0, maxLife: 0, vx: 0, vz: 0 });
-}
-let smokeIdx = 0;
-
-// Lights
-
-// 1. Ambient — dim blue night
-const ambLight = new THREE.AmbientLight(0x151d2e, 1.5);
-scene.add(ambLight);
-
-// 2. Directional — moonlight
-const moonLight = new THREE.DirectionalLight(0x8899cc, 0.6);
-moonLight.position.set(-30, 60, -40);
-moonLight.castShadow = true;
-moonLight.shadow.mapSize.set(2048, 2048);
-moonLight.shadow.camera.near = 0.1;
-moonLight.shadow.camera.far = 200;
-moonLight.shadow.camera.left = -60;
-moonLight.shadow.camera.right = 60;
-moonLight.shadow.camera.top = 60;
-moonLight.shadow.camera.bottom = -60;
-moonLight.shadow.bias = -0.001;
-scene.add(moonLight);
-
-// 3. Hemisphere — sky/ground fill
-const hemiLight = new THREE.HemisphereLight(0x112244, 0x1a2e0f, 0.5);
-scene.add(hemiLight);
-
-// 4. Spotlight — dramatic blue cliff accent
-const cliffSpot = new THREE.SpotLight(0x4488ff, 5, 60, Math.PI/10, 0.5, 1);
-cliffSpot.position.set(-35, 20, -35);
-scene.add(cliffSpot);
-
-// Extra scene objects
-
-// Tyre barriers on inner edge
+// Tyre barriers
 for (let i = 0; i < 12; i++) {
   const angle = (i / 12) * Math.PI * 2;
   const r = ROAD_RADIUS - ROAD_WIDTH/2 - 1.2;
@@ -594,7 +449,7 @@ for (let i = 0; i < 8; i++) {
   scene.add(boulder);
 }
 
-// Center island
+// Center island (grass only, no monument)
 const island = new THREE.Mesh(
   new THREE.CylinderGeometry(12, 12, 0.3, 32),
   new THREE.MeshStandardMaterial({ map: grassTex, color: 0x1a3010 })
@@ -603,46 +458,246 @@ island.position.y = 0.02;
 island.receiveShadow = true;
 scene.add(island);
 
-// Stone monument
-const mono = new THREE.Mesh(
-  new THREE.BoxGeometry(1.5, 4, 1.5),
-  new THREE.MeshStandardMaterial({ color: 0x444455, roughness: 0.7, metalness: 0.3 })
-);
-mono.position.y = 2;
-mono.castShadow = true;
-scene.add(mono);
+// Bonfire
+const bonfireGroup = new THREE.Group();
+bonfireGroup.position.set(0, 0.32, 0);
+scene.add(bonfireGroup);
 
-// Glowing orb
-const orb = new THREE.Mesh(
-  new THREE.SphereGeometry(0.6, 16, 16),
-  new THREE.MeshStandardMaterial({ color: 0x4488ff, emissive: 0x2244ff, emissiveIntensity: 3, transparent: true, opacity: 0.8 })
-);
-orb.position.y = 4.7;
-scene.add(orb);
-const orbLight = new THREE.PointLight(0x4488ff, 8, 15, 2);
-orbLight.position.y = 4.7;
-scene.add(orbLight);
-
-// Floating rings around monument
-const floatingRings = [];
-for (let i = 0; i < 3; i++) {
-  const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(1.5 - i * 0.3, 0.06, 8, 32),
-    new THREE.MeshStandardMaterial({ color: 0x88aaff, emissive: 0x4466ff, emissiveIntensity: 2 })
+// Log pile: teepee shape, 6 logs leaning inward meeting at the top
+const logMat = new THREE.MeshStandardMaterial({ color: 0x3b1f0a, roughness: 1 });
+const LOG_COUNT = 6;
+const LEAN_ANGLE = 0.55; // radians from vertical: lower = more upright, higher = more splayed
+const LOG_LENGTH = 1.6;
+for (let i = 0; i < LOG_COUNT; i++) {
+  const log = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.11, LOG_LENGTH, 8), logMat);
+  const azimuth = (i / LOG_COUNT) * Math.PI * 2;
+  // Position base of each log outward from center
+  const baseR = 0.45;
+  log.position.set(
+    Math.cos(azimuth) * baseR,
+    LOG_LENGTH / 2 * Math.cos(LEAN_ANGLE),
+    Math.sin(azimuth) * baseR
   );
-  ring.position.y = 5.5 + i * 0.7;
-  ring.rotation.x = Math.PI / 2;
-  scene.add(ring);
-  floatingRings.push(ring);
+  // Tilt inward: rotate around the axis perpendicular to the azimuth direction
+  log.rotation.order = 'YXZ';
+  log.rotation.y = azimuth;
+  log.rotation.x = LEAN_ANGLE;
+  log.castShadow = true;
+  bonfireGroup.add(log);
 }
 
+// Stone ring around base
+const stoneMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 1 });
+for (let i = 0; i < 10; i++) {
+  const a = (i / 10) * Math.PI * 2;
+  const stone = new THREE.Mesh(new THREE.DodecahedronGeometry(0.18, 0), stoneMat);
+  stone.position.set(Math.cos(a) * 0.85, 0, Math.sin(a) * 0.85);
+  stone.rotation.set(Math.random(), Math.random(), Math.random());
+  bonfireGroup.add(stone);
+}
+
+// Flame texture: radial gradient on a canvas, bright at base fading to transparent tip
+function makeFlameTexture(colorTop, colorMid, colorBase) {
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, 64, 128);
+  // Vertical gradient: bright base, transparent tip
+  const vg = ctx.createLinearGradient(0, 128, 0, 0);
+  vg.addColorStop(0.0, colorBase);
+  vg.addColorStop(0.4, colorMid);
+  vg.addColorStop(1.0, 'rgba(0,0,0,0)');
+  // Horizontal mask: bright center, transparent edges
+  ctx.save();
+  ctx.fillStyle = vg;
+  ctx.fillRect(0, 0, 64, 128);
+  // Multiply with horizontal radial fade
+  const hg = ctx.createLinearGradient(0, 0, 64, 0);
+  hg.addColorStop(0,    'rgba(0,0,0,1)');
+  hg.addColorStop(0.2,  'rgba(0,0,0,0)');
+  hg.addColorStop(0.8,  'rgba(0,0,0,0)');
+  hg.addColorStop(1.0,  'rgba(0,0,0,1)');
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.fillStyle = hg;
+  ctx.fillRect(0, 0, 64, 128);
+  ctx.restore();
+  return new THREE.CanvasTexture(c);
+}
+
+// Billboard flame quads: multiple layers at different angles and sizes
+const flameLayers = [];
+const flameConfigs = [
+  // [width, height, yOffset, rotY, texture colors, phaseOffset]
+  { w: 0.5, h: 1.0, y: 0.55, ry: 0,             top: 'rgba(255,255,200,0)', mid: 'rgba(255,180,0,0.9)',  base: 'rgba(255,255,150,1)', phase: 0.0  },
+  { w: 0.7, h: 1.3, y: 0.70, ry: Math.PI/4,      top: 'rgba(255,100,0,0)',   mid: 'rgba(255,80,0,0.85)', base: 'rgba(255,200,0,1)',   phase: 0.5  },
+  { w: 0.6, h: 1.1, y: 0.60, ry: Math.PI/2,      top: 'rgba(200,50,0,0)',    mid: 'rgba(255,60,0,0.8)',  base: 'rgba(255,160,0,1)',   phase: 1.1  },
+  { w: 0.8, h: 1.5, y: 0.80, ry: 3*Math.PI/4,    top: 'rgba(150,20,0,0)',    mid: 'rgba(220,40,0,0.75)', base: 'rgba(255,120,0,1)',   phase: 1.7  },
+  { w: 0.5, h: 0.9, y: 0.50, ry: Math.PI/6,      top: 'rgba(255,200,0,0)',   mid: 'rgba(255,150,0,0.9)', base: 'rgba(255,240,180,1)', phase: 2.3  },
+  { w: 0.9, h: 1.7, y: 0.90, ry: 5*Math.PI/6,    top: 'rgba(100,10,0,0)',    mid: 'rgba(180,30,0,0.7)',  base: 'rgba(255,80,0,1)',    phase: 2.9  },
+  { w: 0.4, h: 0.7, y: 0.40, ry: Math.PI/3,      top: 'rgba(255,255,150,0)', mid: 'rgba(255,220,50,0.95)',base:'rgba(255,255,200,1)', phase: 0.8  },
+  { w: 0.6, h: 1.2, y: 0.65, ry: 2*Math.PI/3,    top: 'rgba(180,40,0,0)',    mid: 'rgba(240,60,0,0.8)',  base: 'rgba(255,140,0,1)',   phase: 3.5  },
+];
+
+flameConfigs.forEach(cfg => {
+  const tex = makeFlameTexture(cfg.top, cfg.mid, cfg.base);
+  const mat = new THREE.MeshBasicMaterial({
+    map: tex, transparent: true, side: THREE.DoubleSide,
+    depthWrite: false, blending: THREE.AdditiveBlending
+  });
+  const geo = new THREE.PlaneGeometry(cfg.w, cfg.h);
+  // Shift vertices so the bottom of the plane is at y=0 (pivot at base not center)
+  geo.translate(0, cfg.h / 2, 0);
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.rotation.y = cfg.ry;
+  mesh.position.y = cfg.y;
+  bonfireGroup.add(mesh);
+  flameLayers.push({ mesh, cfg, baseY: cfg.y });
+});
+
+// Glowing ember particles
+const emberParticles = [];
+const emberGeo = new THREE.SphereGeometry(0.03, 4, 4);
+for (let i = 0; i < 30; i++) {
+  const mat = new THREE.MeshBasicMaterial({
+    color: 0xff8800, transparent: true, opacity: 0
+  });
+  const ember = new THREE.Mesh(emberGeo, mat);
+  scene.add(ember);
+  emberParticles.push({ mesh: ember, life: 0, maxLife: 0, vx: 0, vz: 0, vy: 0 });
+}
+let emberIdx = 0;
+
+function spawnEmber() {
+  const p = emberParticles[emberIdx % emberParticles.length];
+  emberIdx++;
+  p.mesh.position.set(
+    (Math.random() - 0.5) * 0.4,
+    0.6 + Math.random() * 0.4,
+    (Math.random() - 0.5) * 0.4
+  );
+  p.life = 0;
+  p.maxLife = 80 + Math.random() * 80;
+  p.vx = (Math.random() - 0.5) * 0.025;
+  p.vz = (Math.random() - 0.5) * 0.025;
+  p.vy = 0.025 + Math.random() * 0.035;
+  p.mesh.material.color.setHSL(0.08 + Math.random() * 0.05, 1, 0.6);
+  p.mesh.material.opacity = 1;
+}
+
+// Two flickering point lights: slightly offset for more interesting shadows
+const fireLight = new THREE.PointLight(0xff6600, 40, 28, 1.5);
+fireLight.position.set(0, 1.2, 0);
+scene.add(fireLight);
+const fireLight2 = new THREE.PointLight(0xff9900, 20, 20, 2);
+fireLight2.position.set(0.3, 0.8, 0.3);
+scene.add(fireLight2);
+
+// AE86 GLB model
+const ae86 = new THREE.Group();
+scene.add(ae86);
+
+// Wheel nodes collected after GLB loads
+const wheels = [];
+
+const gltfLoader = new GLTFLoader();
+gltfLoader.load('Toyota_AE86.glb', (gltf) => {
+  const model = gltf.scene;
+
+  const box = new THREE.Box3().setFromObject(model);
+  const size = new THREE.Vector3();
+  box.getSize(size);
+
+  const targetLength = 4.0;
+  const longestAxis = Math.max(size.x, size.y, size.z);
+  model.scale.setScalar(targetLength / longestAxis);
+
+  model.rotation.y = 0;
+
+  box.setFromObject(model);
+  model.position.y = -box.min.y;
+
+  model.traverse(child => {
+    if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; }
+    const n = child.name.toLowerCase();
+    if (n.includes('wheel') || n.includes('tire') || n.includes('tyre') || n.includes('rim')) {
+      wheels.push(child);
+      child.rotation.z += Math.PI / 2; // initial offset: adjust this value
+      console.log(`[wheel found] "${child.name}"`);
+    }
+  });
+
+  ae86.add(model);
+
+  const loading = document.getElementById('loading');
+  if (loading) {
+    loading.style.opacity = '0';
+    setTimeout(() => loading.remove(), 800);
+  }
+}, undefined, (err) => {
+  console.error('GLB load error:', err);
+  const loading = document.getElementById('loading');
+  if (loading) { loading.style.opacity = '0'; setTimeout(() => loading.remove(), 800); }
+});
+
+// Headlight spotlights: attached to ae86 group so they move with the car automatically
+const hlLightL = new THREE.SpotLight(0xffffff, 120, 35, Math.PI/10, 0.2, 1.2);
+const hlLightR = new THREE.SpotLight(0xffffff, 120, 35, Math.PI/10, 0.2, 1.2);
+// Place lights at front-left and front-right of car in local space
+hlLightL.position.set(-0.5, 0.7, 2.0);
+hlLightR.position.set( 0.5, 0.7, 2.0);
+// Targets also in local space: straight ahead along +Z
+const hlTargetL = new THREE.Object3D();
+const hlTargetR = new THREE.Object3D();
+hlTargetL.position.set(-0.5, 0, 15);
+hlTargetR.position.set( 0.5, 0, 15);
+ae86.add(hlLightL, hlLightR, hlTargetL, hlTargetR);
+hlLightL.target = hlTargetL;
+hlLightR.target = hlTargetR;
+
+// Tire smoke particles
+const smokeParticles = [];
+const smokeGeo = new THREE.SphereGeometry(0.15, 6, 6);
+for (let i = 0; i < 30; i++) {
+  const smoke = new THREE.Mesh(smokeGeo, new THREE.MeshBasicMaterial({
+    color: 0xaaaaaa, transparent: true, opacity: 0, blending: THREE.AdditiveBlending
+  }));
+  scene.add(smoke);
+  smokeParticles.push({ mesh: smoke, life: 0, maxLife: 0, vx: 0, vz: 0 });
+}
+let smokeIdx = 0;
+
+// Lights
+
+// 1. Ambient: dim blue night
+const ambLight = new THREE.AmbientLight(0x151d2e, 1.5);
+scene.add(ambLight);
+
+// 2. Directional: moonlight
+const moonLight = new THREE.DirectionalLight(0x8899cc, 0.6);
+moonLight.position.set(-30, 60, -40);
+moonLight.castShadow = true;
+moonLight.shadow.mapSize.set(2048, 2048);
+moonLight.shadow.camera.near = 0.1;
+moonLight.shadow.camera.far = 200;
+moonLight.shadow.camera.left = -60;
+moonLight.shadow.camera.right = 60;
+moonLight.shadow.camera.top = 60;
+moonLight.shadow.camera.bottom = -60;
+moonLight.shadow.bias = -0.001;
+scene.add(moonLight);
+
+// 3. Hemisphere: sky/ground fill
+const hemiLight = new THREE.HemisphereLight(0x112244, 0x1a2e0f, 0.5);
+scene.add(hemiLight);
+
+// 4. Spotlight: dramatic blue cliff accent
+const cliffSpot = new THREE.SpotLight(0x4488ff, 5, 60, Math.PI/10, 0.5, 1);
+cliffSpot.position.set(-35, 20, -35);
+scene.add(cliffSpot);
 
 // Animation
 let t = 0;
-const CAR_SPEED  = 0.008;
-// Drift: car body slides outward while nose cuts toward center.
-// Tangent points forward along the circle. Subtracting the drift angle
-// rotates the nose inward (toward origin), rear swings out — classic drift.
+const CAR_SPEED   = 0.008;
 const DRIFT_ANGLE = 0.28;
 
 function spawnSmoke(x, z) {
@@ -663,30 +718,21 @@ function animate() {
   frameCount++;
   t += CAR_SPEED;
 
-  // Car position on circle
   const carAngle = t;
   const cx = Math.cos(carAngle) * ROAD_RADIUS;
   const cz = Math.sin(carAngle) * ROAD_RADIUS;
   const tx = -Math.sin(carAngle);
-  const tz = Math.cos(carAngle);
+  const tz =  Math.cos(carAngle);
 
   ae86.position.set(cx, 0.0, cz);
-  // Subtract drift angle: nose rotates toward center, rear slides out
   ae86.rotation.y = Math.atan2(tx, tz) - DRIFT_ANGLE;
   ae86.rotation.z = -0.08;
 
-  // Headlight positions follow car
-  hlLightL.position.set(cx + tx * 2.5 - 0.5, 0.8, cz + tz * 2.5);
-  hlLightR.position.set(cx + tx * 2.5 + 0.5, 0.8, cz + tz * 2.5);
-  hlTargetL.position.set(cx + tx * 12, 0, cz + tz * 12);
-  hlTargetR.position.set(cx + tx * 12, 0, cz + tz * 12);
-
-  // Tire smoke
+  // Tire smoke from rear outer wheel
   if (frameCount % 3 === 0) {
     spawnSmoke(cx - tx * 1.3 + tz * 0.9, cz - tz * 1.3 - tx * 0.9);
   }
 
-  // Update smoke
   smokeParticles.forEach(p => {
     if (p.maxLife === 0) return;
     p.life++;
@@ -699,17 +745,44 @@ function animate() {
     if (p.life >= p.maxLife) p.maxLife = 0;
   });
 
-
-  // Pulsing orb
-  const pulse = Math.sin(frameCount * 0.05) * 0.5 + 1;
-  orb.scale.setScalar(pulse);
-  orbLight.intensity = 8 * pulse;
-
-  // Spinning rings
-  floatingRings.forEach((ring, i) => {
-    ring.rotation.z += 0.01 * (i % 2 === 0 ? 1 : -1);
+  // Bonfire flicker: each billboard layer sways and scales independently
+  flameLayers.forEach((fl, i) => {
+    const phase = fl.cfg.phase;
+    const sway = Math.sin(frameCount * 0.12 + phase) * 0.06 +
+                 Math.sin(frameCount * 0.23 + phase * 1.7) * 0.03;
+    const scaleX = 0.85 + Math.sin(frameCount * 0.17 + phase) * 0.2 +
+                         Math.sin(frameCount * 0.31 + phase * 2.1) * 0.1;
+    const scaleY = 0.9  + Math.sin(frameCount * 0.13 + phase * 0.9) * 0.15;
+    fl.mesh.scale.set(scaleX, scaleY, 1);
+    fl.mesh.position.y = fl.baseY + Math.sin(frameCount * 0.1 + phase) * 0.05;
+    fl.mesh.rotation.x = sway;
+    fl.mesh.material.opacity = 0.75 + Math.sin(frameCount * 0.19 + phase) * 0.2;
   });
 
+  // Firelight flicker: two lights with slightly different patterns
+  fireLight.intensity  = 38 + Math.sin(frameCount * 0.11) * 10 + Math.sin(frameCount * 0.29) * 6;
+  fireLight2.intensity = 18 + Math.sin(frameCount * 0.17 + 1.2) * 7 + Math.sin(frameCount * 0.37) * 4;
+  fireLight.color.setHSL( 0.07 + Math.sin(frameCount * 0.04) * 0.02, 1, 0.52);
+  fireLight2.color.setHSL(0.09 + Math.sin(frameCount * 0.06) * 0.02, 1, 0.55);
+
+  // Spawn and update embers
+  if (frameCount % 8 === 0) spawnEmber();
+  emberParticles.forEach(p => {
+    if (p.maxLife === 0) return;
+    p.life++;
+    const frac = p.life / p.maxLife;
+    p.mesh.position.x += p.vx;
+    p.mesh.position.z += p.vz;
+    p.mesh.position.y += p.vy;
+    p.vy *= 0.98;
+    p.vx += (Math.random() - 0.5) * 0.002;
+    p.vz += (Math.random() - 0.5) * 0.002;
+    p.mesh.material.opacity = Math.max(0, 1 - frac);
+    if (p.life >= p.maxLife) p.maxLife = 0;
+  });
+
+  // Spin wheels: rotate around their local Z axis
+  wheels.forEach(w => { w.rotation.z += CAR_SPEED * 15; });
 
   controls.update();
   renderer.render(scene, camera);
