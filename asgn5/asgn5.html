@@ -315,7 +315,7 @@ function makeRoadRing(innerR, outerR, segments) {
   }
   for (let i = 0; i < segments; i++) {
     const a = i*2, b = a+1, c = a+2, d = a+3;
-    indices.push(a, b, c, b, d, c);
+    indices.push(a, c, b, b, c, d);
   }
   geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
@@ -341,9 +341,13 @@ scene.add(wetRoad);
 
 // Guardrails
 function makeGuardrail(radius) {
-  const mat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8, roughness: 0.3 });
+  const mat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8, roughness: 0.3, side: THREE.DoubleSide });
   [0.4, 0.8].forEach(h => {
-    const mesh = new THREE.Mesh(makeRoadRing(radius - 0.08, radius + 0.08, ROAD_SEGMENTS), mat);
+    // Upright rail: an open-ended cylinder band wrapping the track at height h
+    const mesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(radius, radius, 0.16, ROAD_SEGMENTS, 1, true),
+      mat
+    );
     mesh.position.y = h;
     mesh.castShadow = true;
     scene.add(mesh);
@@ -434,9 +438,12 @@ for (let i = 0; i < 8; i++) {
   pole.castShadow = true;
   scene.add(pole);
 
-  const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.5, 6), poleMat);
-  arm.rotation.z = Math.PI / 2;
-  arm.position.set(x + Math.cos(angle + Math.PI)*0.75, 6.1, z + Math.sin(angle + Math.PI)*0.75);
+  const ARM_LEN = 1.5;
+  const armDir = new THREE.Vector3(Math.cos(angle + Math.PI), 0, Math.sin(angle + Math.PI)).normalize();
+  const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, ARM_LEN, 6), poleMat);
+  // Align the cylinder's Y axis with the horizontal direction pointing from pole to lamp
+  arm.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), armDir);
+  arm.position.set(x + armDir.x * (ARM_LEN/2), 6.1, z + armDir.z * (ARM_LEN/2));
   scene.add(arm);
 
   const lampMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffee88, emissiveIntensity: 2 });
@@ -444,6 +451,7 @@ for (let i = 0; i < 8; i++) {
   const lx = x + Math.cos(angle + Math.PI)*1.5;
   const lz = z + Math.sin(angle + Math.PI)*1.5;
   lamp.position.set(lx, 6, lz);
+  lamp.rotation.y = -(angle + Math.PI);
   scene.add(lamp);
 
   const ptLight = new THREE.PointLight(0xffee88, 80, 30, 1.5);
@@ -467,7 +475,7 @@ for (let i = 0; i < 12; i++) {
 // Roadside reflector posts
 for (let i = 0; i < 16; i++) {
   const angle = (i / 16) * Math.PI * 2;
-  const r = ROAD_RADIUS + ROAD_WIDTH/2 + 0.8;
+  const r = ROAD_RADIUS + ROAD_WIDTH/2 + 0.4;
   const post = new THREE.Mesh(
     new THREE.CylinderGeometry(0.05, 0.05, 0.8, 6),
     new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xff4400, emissiveIntensity: 1.5 })
@@ -490,7 +498,7 @@ for (let i = 0; i < 8; i++) {
   scene.add(boulder);
 }
 
-// Center island (grass only, no monument)
+// Center island
 const island = new THREE.Mesh(
   new THREE.CylinderGeometry(12, 12, 0.3, 32),
   new THREE.MeshStandardMaterial({ map: grassTex, color: 0x1a3010 })
@@ -507,22 +515,17 @@ scene.add(bonfireGroup);
 // Log pile: teepee shape, 6 logs leaning inward meeting at the top
 const logMat = new THREE.MeshStandardMaterial({ color: 0x3b1f0a, roughness: 1 });
 const LOG_COUNT = 6;
-const LEAN_ANGLE = 0.55; // radians from vertical: lower = more upright, higher = more splayed
 const LOG_LENGTH = 1.6;
+const BASE_R = 0.45;      // radius of the ring the log bases sit on
+const APEX_HEIGHT = 1.45; // height where all the log tops converge
 for (let i = 0; i < LOG_COUNT; i++) {
   const log = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.11, LOG_LENGTH, 8), logMat);
   const azimuth = (i / LOG_COUNT) * Math.PI * 2;
-  // Position base of each log outward from center
-  const baseR = 0.45;
-  log.position.set(
-    Math.cos(azimuth) * baseR,
-    LOG_LENGTH / 2 * Math.cos(LEAN_ANGLE),
-    Math.sin(azimuth) * baseR
-  );
-  // Tilt inward: rotate around the axis perpendicular to the azimuth direction
-  log.rotation.order = 'YXZ';
-  log.rotation.y = azimuth;
-  log.rotation.x = LEAN_ANGLE;
+  const base = new THREE.Vector3(Math.cos(azimuth) * BASE_R, 0, Math.sin(azimuth) * BASE_R);
+  const apex = new THREE.Vector3(0, APEX_HEIGHT, 0);
+  const dir = apex.clone().sub(base).normalize();
+  log.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+  log.position.copy(base).add(dir.clone().multiplyScalar(LOG_LENGTH / 2));
   log.castShadow = true;
   bonfireGroup.add(log);
 }
